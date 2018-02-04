@@ -1,0 +1,98 @@
+        -:    0:Source:cardtest3.c
+        -:    0:Graph:cardtest3.gcno
+        -:    0:Data:cardtest3.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:/******************************************************************************
+        -:    2: * Author: Jonathan Grocott
+        -:    3: * Description: Unit tests for the village cardEffect function in dominion.c. 
+        -:    4: * File Name: cardtest3.c
+        -:    5: * Date Created: 2/1/2018
+        -:    6: *****************************************************************************/
+        -:    7:#include <stdio.h>
+        -:    8:#include <assert.h>
+        -:    9:#include <stdlib.h>
+        -:   10:#include <string.h>
+        -:   11:#include "dominion.h"
+        -:   12:#include "dominion_helpers.h"
+        -:   13:#include "rngs.h"
+        -:   14:#include "interface.h"
+        -:   15:#include "testTools.c"
+        -:   16:
+        1:   17:int main() {
+        -:   18:	struct gameState state,			// running instance of game
+        -:   19:					 stateOriginal;	// backup copy of game to detect changes
+        1:   20:	int i = 0,						// iteration variable for loop counting
+        1:   21:		numPlayers = 2,				// number of players in game
+        1:   22:		count = 0,					// counts number of village cards
+        1:   23:		randomSeed = 10000,			// seed for random generation
+        1:   24:		validationCheck = 1;		// used to determine pass or fail
+        -:   25:		
+        1:   26:	int failure = 0; 	
+        -:   27:	// initial array of kingdom cards
+        1:   28:	int kingdomCards[10] = {adventurer, gardens, village, minion, mine, cutpurse,
+        -:   29:							sea_hag, remodel, smithy};
+        -:   30:	
+        -:   31:	// Initializing game and backup copy of game
+        1:   32:	initializeGame(numPlayers, kingdomCards, randomSeed, &state);
+        -:   33:
+        -:   34:	// PERFORMING OPERATIONS TO MEET TEST CONDITION
+        1:   35:	state.hand[state.whoseTurn][0] = village;
+        1:   36:	memcpy(&stateOriginal, &state, sizeof(struct gameState));
+        -:   37:
+        -:   38:	// DISPLAY
+        1:   39:	printf("\n-----------------------------------------");
+        1:   40:    printf("\n--------Testing villageCall()----------\n\n");
+        -:   41:	
+        -:   42:	
+        -:   43:	//refactored during card tests
+        1:   44:	villageCall(0, 0, 0, 0, &state, 0, 0);
+        -:   45:	
+        1:   46:	printf("\n----Test #1: One card is drawn and added to the player's hand----\n");
+        -:   47:	
+        1:   48:	validationCheck = 1;
+        2:   49:	if (state.hand[state.whoseTurn][state.handCount[state.whoseTurn] - 1] != 
+        1:   50:		stateOriginal.deck[state.whoseTurn][state.deckCount[state.whoseTurn]]) {
+    #####:   51:		validationCheck = 0;
+    #####:   52:		failure++;
+        -:   53:	}
+        1:   54:	printTestResult(validationCheck, 1, 1);
+        -:   55:
+        1:   56:	printf("\n----Test #2: Two actions are added to the game state----\n");
+        1:   57:	validationCheck = 1;
+        1:   58:	if (state.numActions != stateOriginal.numActions + 2){
+        1:   59:		validationCheck = 0;
+        1:   60:		failure++;
+        -:   61:	}
+        1:   62:	printTestResult(validationCheck, 2, 1);
+        -:   63:
+        1:   64:	printf("\n----Test #3: Adventurer card is removed from player's hand and discarded----\n");
+        1:   65:	validationCheck = 1;
+        1:   66:	count = 0;
+        6:   67:	for (i = 0; i < stateOriginal.handCount[stateOriginal.whoseTurn]; i++) {
+        5:   68:		if (stateOriginal.hand[state.whoseTurn][i] == village) {
+        1:   69:			count++;
+        -:   70:		}
+        -:   71:	}
+        -:   72:
+        6:   73:	for (i = 0; i < state.handCount[stateOriginal.whoseTurn]; i++) {
+        5:   74:		if (state.hand[state.whoseTurn][i] == village) {
+    #####:   75:			count--;
+        -:   76:		}
+        -:   77:	}
+        1:   78:	if (count != 1){
+    #####:   79:		validationCheck = 0;
+    #####:   80:		failure++;
+        -:   81:	}
+        -:   82:	// successful if one remains after comparing two decks
+        1:   83:	printTestResult(validationCheck, 1, 1);
+        -:   84:	
+        1:   85:	if(failure == 0){
+    #####:   86:		printf("\n\n\n >>>>>>ALL TESTS PASSED: villageCall() \n\n\n");
+        -:   87:	}
+        -:   88:	else{
+        1:   89:		printf("\n\n\n >>>>>>FAILURES IN VILLAGE: %d \n\n\n", failure);
+        -:   90:	}
+        -:   91:
+        1:   92:	return 0;
+        -:   93:}

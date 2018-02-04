@@ -644,7 +644,7 @@ int getCost(int cardNumber)
 }
 
 
-int smithyCall(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus){
+int smithyCall(struct gameState *state, int handPos){
 //BUG on line 652
 
 //+3 Cards
@@ -997,7 +997,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
       return 0;
 		
     case smithy:
-		smithyCall(card, choice1, choice2, choice3, state, handPos, bonus);
+		smithyCall(state, handPos); //refactored during cardtest1 
       
 		
     case village:

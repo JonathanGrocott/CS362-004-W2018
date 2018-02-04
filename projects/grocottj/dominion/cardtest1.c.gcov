@@ -1,0 +1,139 @@
+        -:    0:Source:cardtest1.c
+        -:    0:Graph:cardtest1.gcno
+        -:    0:Data:cardtest1.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:/******************************************************************************
+        -:    2: * Author: Jonathan Grocott
+        -:    3: * Description: Unit tests for the smithy cardEffect function in dominion.c. 
+        -:    4: * File Name: cardtest1.c
+        -:    5: * Date Created: 1/29/2018
+        -:    6: *****************************************************************************/
+        -:    7:#include <stdio.h>
+        -:    8:#include <assert.h>
+        -:    9:#include <stdlib.h>
+        -:   10:#include <string.h>
+        -:   11:#include "dominion.h"
+        -:   12:#include "dominion_helpers.h"
+        -:   13:#include "rngs.h"
+        -:   14:#include "interface.h"
+        -:   15:#include "testTools.c"
+        -:   16:
+        1:   17:int main() {
+        -:   18:	struct gameState state,	stateOriginal;	// backup copy of game to detect changes
+        1:   19:	int i = 0, j = 0,						// iteration variable for loop counting
+        1:   20:		numPlayers = 2,				// number of players in game
+        1:   21:		randomSeed = 10000,			// seed for random generation
+        1:   22:		validationCheck = 1,		// used to determine P/F
+        1:   23:		found = 0;					// detects if card found in deck
+        -:   24:		
+        1:   25:		int failure = 0; 
+        -:   26:	// Setup initial array of kingdom cards
+        1:   27:	int kingdomCards[10] = {adventurer, gardens, village, minion, mine, cutpurse,
+        -:   28:							sea_hag, remodel, smithy};
+        -:   29:	
+        -:   30:	// Initializing game and backup copy of game
+        1:   31:	initializeGame(numPlayers, kingdomCards, randomSeed, &state);
+        -:   32:
+        -:   33:	// PERFORMING OPERATIONS TO MEET TEST CONDITION
+        1:   34:	state.hand[state.whoseTurn][0] = smithy;
+        1:   35:	memcpy(&stateOriginal, &state, sizeof(struct gameState));
+        -:   36:
+        -:   37:	// DISPLAY
+        1:   38:	printf("\n-----------------------------------------");
+        1:   39:    printf("\n--------Testing smithyCall()----------\n\n");
+        1:   40:	printf("\n----Test #1: 3 valid cards added to current player hand----\n");
+        -:   41:	
+        -:   42:	//Refactored for cardtest1
+        1:   43:	smithyCall(&state, 0);
+        -:   44:	
+        1:   45:	validationCheck = 1;
+        9:   46:	for (i = 0; i < state.handCount[state.whoseTurn]; i++) {
+        8:   47:		if (state.hand[state.whoseTurn][i] != stateOriginal.hand[state.whoseTurn][i]) {
+        4:   48:			if (state.hand[state.whoseTurn][i] == -1) {
+    #####:   49:				validationCheck = 0;
+    #####:   50:				failure++; 
+        -:   51:			}
+        -:   52:		}
+        -:   53:	}
+        -:   54:	// Ensure top card is valid selection
+        1:   55:	if (state.hand[state.whoseTurn][stateOriginal.handCount[state.whoseTurn] + 1] == -1){
+    #####:   56:		validationCheck = 0;
+    #####:   57:		failure++;
+        -:   58:	}
+        -:   59:	// Ensure card after top card is -1
+        1:   60:	if (state.hand[state.whoseTurn][stateOriginal.handCount[state.whoseTurn] + 2] != -1){
+        1:   61:		validationCheck = 0;
+        1:   62:		failure++;
+        -:   63:	}
+        1:   64:	printTestResult(validationCheck, 3, 4);
+        -:   65:
+        1:   66:	printf("\n----Test #2: Current player hand count changed: 3 draws - 1 discard = 2----\n");
+        1:   67:	validationCheck = 0;
+        1:   68:	if (state.handCount[state.whoseTurn] != stateOriginal.handCount[state.whoseTurn] + 2){
+        1:   69:		validationCheck = 0;
+        1:   70:		failure++;
+        -:   71:	}
+        1:   72:	printTestResult(validationCheck, 2, 3);
+        -:   73:
+        1:   74:	printf("\n----Test #3: The smithy card is properly removed from the player hand----\n");
+        1:   75:	validationCheck = 1;
+        1:   76:	if (state.hand[state.whoseTurn][0] == smithy){
+    #####:   77:		validationCheck = 0;
+    #####:   78:		failure++;
+        -:   79:	}
+        1:   80:	printTestResult(validationCheck, 1, 0);
+        -:   81:	
+        1:   82:	printf("\n----Test #4: 3 cards	came from player's deck----\n");
+        1:   83:	validationCheck = 1;
+        9:   84:	for (i = 0; i < state.handCount[state.whoseTurn]; i++) {
+        8:   85:		if (state.hand[state.whoseTurn][i] != stateOriginal.hand[state.whoseTurn][i]) {
+        4:   86:			found = 0;
+       24:   87:			for (j = 0; j < stateOriginal.deckCount[state.whoseTurn]; j++) {
+       20:   88:				if (state.hand[state.whoseTurn][i] == stateOriginal.deck[state.whoseTurn][j]) {
+       11:   89:					found = 1;
+        -:   90:				}
+        -:   91:			}
+        4:   92:			if (found == 0){
+    #####:   93:				validationCheck = 0;
+    #####:   94:				failure++;
+        -:   95:			}
+        -:   96:		}
+        -:   97:	}
+        1:   98:	printTestResult(validationCheck, 1, 0);
+        -:   99:
+        1:  100:	printf("\n----Test #5: Player 2's decks were not modified----\n");
+        1:  101:	validationCheck = 1;
+        1:  102:	if (isHandSame(&state, &stateOriginal, state.whoseTurn + 1) != 1){
+    #####:  103:		validationCheck = 0;
+    #####:  104:		failure++;
+        -:  105:	}
+        1:  106:	if (isDeckSame(&state, &stateOriginal, state.whoseTurn + 1) != 1){
+    #####:  107:		validationCheck = 0;
+    #####:  108:		failure++;
+        -:  109:	}
+        1:  110:	if (isDiscardSame(&state, &stateOriginal, state.whoseTurn + 1) != 1){
+    #####:  111:		validationCheck = 0;
+    #####:  112:		failure++;
+        -:  113:	}
+        1:  114:	printTestResult(validationCheck, 1, 0);
+        -:  115:
+        1:  116:	printf("\n----Test #6: Game kingdom decks were not modified----\n");
+        1:  117:	validationCheck = 1;
+       29:  118:	for (i = 0; i < 28; i++) {
+       28:  119:		if (state.supplyCount[i] != stateOriginal.supplyCount[i]){
+    #####:  120:			validationCheck = 0;
+    #####:  121:			failure++;
+        -:  122:		}
+        -:  123:	}
+        1:  124:	printTestResult(validationCheck, 1, 1);
+        -:  125:	
+        1:  126:	if(failure == 0){
+    #####:  127:		printf("\n\n\n >>>>>>ALL TESTS PASSED: smithyCall() \n\n\n");
+        -:  128:	}
+        -:  129:	else{
+        1:  130:		printf("\n\n\n >>>>>>FAILURES IN SMITHY: %d \n\n\n", failure);
+        -:  131:	}
+        -:  132:	
+        1:  133:	return 0;
+        -:  134:}

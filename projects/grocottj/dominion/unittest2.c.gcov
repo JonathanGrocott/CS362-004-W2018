@@ -1,0 +1,54 @@
+        -:    0:Source:unittest2.c
+        -:    0:Graph:unittest2.gcno
+        -:    0:Data:unittest2.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:/* -----------------------------------------------------------------------
+        -:    2: * Author: Jonathan Grocott
+        -:    3: * Description: Unit tests for the getCost() function in dominion.c. 
+        -:    4: * File Name: unittest2.c
+        -:    5: * Date Created: 1/31/2018
+        -:    6: * -----------------------------------------------------------------------*/
+        -:    7:
+        -:    8:#include "dominion.h"
+        -:    9:#include "dominion_helpers.h"
+        -:   10:#include <string.h>
+        -:   11:#include <stdio.h>
+        -:   12:#include <stdlib.h>
+        -:   13:#include "rngs.h"
+        -:   14:
+        -:   15:
+        -:   16:
+        1:   17:int main(){
+        -:   18:	
+        -:   19:	int i; 
+        -:   20:	int value;
+        1:   21:	int cardAmount = 27;
+        1:   22:	int failure = 0; 
+        1:   23:	char *availableCards[27]= {"curse", "estate", "duchy", "province", "copper", "silver", "gold", "adventurer", "council_room", 
+        -:   24:			"feast", "gardens", "mine", "remodel", "smithy", "village", "baron", "great_hall", "minion", "steward",
+        -:   25:			"tribute", "ambassador", "cutpurse", "embargo", "outpost", "salvager", "sea_hag", "treasure_map"};
+        -:   26:
+        1:   27:	int cardValue[27] = {0,2,5,8,0,3,6,6,5,4,4,5,4,4,3,4,3,5,3,5,3,4,2,5,4,4,4};
+        -:   28:
+        1:   29:	printf("\n\n-----------------------------------------");
+        1:   30:    printf("\n--------Testing getCost()----------\n\n");
+        -:   31:	
+       28:   32:	for (i = 0; i < cardAmount; i++){
+       27:   33:		value = getCost(i);
+       27:   34:		if(value == cardValue[i]){
+       27:   35:			printf("SUCCESS:%s is the correct amount of %d\n", availableCards[i], cardValue[i]);
+        -:   36:		}
+        -:   37:		else{
+    #####:   38:			printf(">>>>>ERROR: %s is the incorrect amount.\n", availableCards[i]);
+    #####:   39:			failure = 1;
+        -:   40:		}
+        -:   41:	}
+        -:   42:	
+        1:   43:	if(failure != 1){
+        1:   44:		printf("\n\n\n >>>>>>ALL TESTS PASSED: getCost() \n\n\n");
+        -:   45:	}
+        -:   46:
+        1:   47:	return (0);
+        -:   48:	
+        -:   49:}

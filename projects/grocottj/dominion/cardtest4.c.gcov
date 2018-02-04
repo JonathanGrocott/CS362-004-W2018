@@ -1,0 +1,267 @@
+        -:    0:Source:cardtest4.c
+        -:    0:Graph:cardtest4.gcno
+        -:    0:Data:cardtest4.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:/******************************************************************************
+        -:    2: * Author: Jonathan Grocott
+        -:    3: * Description: Unit tests for the mineCall function in dominion.c.
+        -:    4:	 * Trash a treasure card for a treasure card costing up to 3 coins more.
+        -:    5:	 * The new treasure card should be added to the player's hand.
+        -:    6:	 * Move the played card to the playedCards pile. 
+        -:    7: * File Name: cardtest4.c
+        -:    8: * Date Created: 2/3/2018
+        -:    9: *****************************************************************************/
+        -:   10:
+        -:   11:#include <stdio.h>
+        -:   12:#include <string.h>
+        -:   13:#include "dominion.h"
+        -:   14:#include "testTools.c"
+        -:   15:
+        -:   16:#define P1 0
+        -:   17:#define P2 1
+        -:   18:#define HANDPOS 0
+        -:   19:#define COPPERPOS 1
+        -:   20:#define COPPER2POS 2
+        -:   21:#define BARONPOS 3
+        -:   22:#define ESTATEPOS 4
+        -:   23:
+        1:   24:int testMine() {
+        1:   25:  int passCount = 0;
+        1:   26:  int testCount = 0;
+        1:   27:  int failure = 0; 
+        1:   28:  int result = 0;
+        1:   29:  struct gameState initialState = {0};
+        1:   30:  struct gameState state = {0};
+        1:   31:  struct gameState preState = {0};
+        1:   32:  struct gameStateComparison gsc = {0};
+        -:   33:
+        1:   34:  printf("\n-----------------------------------------");
+        1:   35:  printf("\n--------Testing mineCall()----------\n\n");
+        -:   36:
+        -:   37:  /* Set up a custom game state */
+        1:   38:  state.whoseTurn = P1;
+        1:   39:  state.deck[P1][0] = estate;
+        1:   40:  state.deck[P1][1] = silver;
+        1:   41:  state.deck[P1][2] = mine;
+        1:   42:  state.deck[P1][3] = gardens;
+        1:   43:  state.deck[P1][4] = cutpurse;
+        1:   44:  state.deckCount[P1] = 5;
+        1:   45:  state.hand[P1][0] = mine;
+        1:   46:  state.hand[P1][1] = copper;
+        1:   47:  state.hand[P1][2] = copper;
+        1:   48:  state.hand[P1][3] = baron;
+        1:   49:  state.hand[P1][4] = estate;
+        1:   50:  state.handCount[P1] = 5;
+        1:   51:  state.discardCount[P1] = 0;
+        1:   52:  state.deck[P2][0] = silver;
+        1:   53:  state.deck[P2][1] = smithy;
+        1:   54:  state.deckCount[P2] = 2;
+        1:   55:  state.hand[P2][2] = gardens;
+        1:   56:  state.hand[P2][3] = council_room;
+        1:   57:  state.handCount[P2] = 2;
+        1:   58:  state.supplyCount[silver] = 10;
+        1:   59:  memcpy(&initialState, &state, sizeof(struct gameState));
+        -:   60:
+        -:   61:  /* Test using a non-treasure card for choice1 */
+        1:   62:  printf("\n----Test #1: choice1 = estate, choice2 = silver----\n");
+        1:   63:  memcpy(&preState, &state, sizeof(struct gameState));
+        -:   64:  
+        -:   65:  //refactored
+        1:   66:  result = mineCall(0, ESTATEPOS, silver, 0, &state, HANDPOS, 0);
+        -:   67:  
+        -:   68:
+        -:   69:  /* Should not make any changes when choice1 isn't treasure */
+        1:   70:  testCount += 1;
+        1:   71:  passCount += fakeAssert(
+        -:   72:    "Should not change state when choice1 isn't treasure (< copper)",
+        1:   73:    (compareState(&state, &preState, &gsc) == 0)
+        -:   74:  );
+        -:   75:
+        -:   76:  /* Should return -1 when choice1 isn't treasure */
+        1:   77:  testCount += 1;
+        1:   78:  passCount += fakeAssert(
+        -:   79:    "Should return -1 when choice1 isn't treasure (< copper)",
+        -:   80:    (result == -1)
+        -:   81:  );
+        -:   82:
+        -:   83:  /* Test using a non-treasure card for choice1 */
+        1:   84:  printf("\n----Test #2: choice1 = baron, choice2 = silver----\n");
+        1:   85:  memcpy(&preState, &state, sizeof(struct gameState));
+        -:   86:  
+        -:   87:
+        1:   88:	result = mineCall(0, BARONPOS, silver, 0, &state, HANDPOS, 0);
+        -:   89:  
+        -:   90:  /* Should not make any changes when choice1 isn't treasure */
+        1:   91:  testCount += 1;
+        1:   92:  passCount += fakeAssert(
+        -:   93:    "Should not change state when choice1 isn't treasure (> gold)",
+        1:   94:    (compareState(&state, &preState, &gsc) == 0)
+        -:   95:  );
+        -:   96:
+        -:   97:  /* Should return -1 when choice1 isn't treasure */
+        1:   98:  testCount += 1;
+        1:   99:  passCount += fakeAssert(
+        -:  100:    "Should return -1 when choice1 isn't treasure (> gold)",
+        -:  101:    (result == -1)
+        -:  102:  );
+        -:  103:
+        -:  104:  /* Test using a treasure card for choice 1 and a non-card for choice2 */
+        1:  105:  printf("\n----Test #3: choice1 = copper, choice2 = treasure_map + 999----\n");
+        1:  106:  memcpy(&initialState, &state, sizeof(struct gameState));
+        1:  107:  memcpy(&preState, &state, sizeof(struct gameState));
+        -:  108:  
+        -:  109:
+        1:  110:	result = mineCall(0, COPPERPOS, treasure_map+999, 0, &state, HANDPOS, 0);
+        -:  111:  
+        -:  112:  /* Should not make any changes when choice1 isn't a real card */
+        1:  113:  testCount += 1;
+        1:  114:  passCount += fakeAssert(
+        -:  115:    "Should not change state when choice1 isn't a card (> treasure_map)",
+        1:  116:    (compareState(&state, &preState, &gsc) == 0)
+        -:  117:  );
+        -:  118:
+        -:  119:  /* Should return -1 when choice1 isn't treasure */
+        1:  120:  testCount += 1;
+        1:  121:  passCount += fakeAssert(
+        -:  122:    "Should return -1 when choice1 isn't a card (> treasure_map)",
+        -:  123:    (result == -1)
+        -:  124:  );
+        -:  125:
+        -:  126:  /* Test using a treasure card for choice 1 and a non-card for choice2 */
+        1:  127:  printf("\n----Test #4: choice1 = copper, choice2 = curse - 999----\n");
+        1:  128:  memcpy(&initialState, &state, sizeof(struct gameState));
+        1:  129:  memcpy(&preState, &state, sizeof(struct gameState));
+        -:  130:  
+        -:  131:
+        1:  132:	result = mineCall(0, COPPERPOS, curse-999, 0, &state, HANDPOS, 0);
+        -:  133:  
+        -:  134:  /* Should not make any changes when choice1 isn't a real card */
+        1:  135:  testCount += 1;
+        1:  136:  passCount += fakeAssert(
+        -:  137:    "Should not change state when choice1 isn't a card (< curse)",
+        1:  138:    (compareState(&state, &preState, &gsc) == 0)
+        -:  139:  );
+        -:  140:
+        -:  141:  /* Should return -1 when choice1 isn't treasure */
+        1:  142:  testCount += 1;
+        1:  143:  passCount += fakeAssert(
+        -:  144:    "Should return -1 when choice1 isn't a card (< curse)",
+        -:  145:    (result == -1)
+        -:  146:  );
+        -:  147:
+        -:  148:  /* Test using a treasure card for choice1 and a non-treasure card for
+        -:  149:     choice 2 */
+        1:  150:  printf("\n----Test #5: choice1 = copper, choice2 = estate----\n");
+        1:  151:  memcpy(&state, &initialState, sizeof(struct gameState));
+        1:  152:  memcpy(&preState, &state, sizeof(struct gameState));
+        -:  153:  
+        1:  154:	result = mineCall(0, COPPERPOS, estate, 0, &state, HANDPOS, 0);
+        -:  155:  
+        -:  156:  /* Should not make any changes when choice2 isn't treasure */
+        1:  157:  testCount += 1;
+        1:  158:  passCount += fakeAssert(
+        -:  159:    "Should not change state when choice2 isn't treasure",
+        1:  160:    (compareState(&state, &preState, &gsc) == 0)
+        -:  161:  );
+        -:  162:
+        -:  163:  /* Should return -1 when choice2 isn't treasure */
+        1:  164:  testCount += 1;
+        1:  165:  passCount += fakeAssert(
+        -:  166:    "Should return -1 when choice2 isn't treasure",
+        -:  167:    (result == -1)
+        -:  168:  );
+        -:  169:
+        -:  170:  /* Test using a treasure card for choice1 and a treasure card that's more
+        -:  171:     than 3 coins more expensive */
+        1:  172:  printf("\n----Test #6: choice1 = copper, choice2 = gold----\n");
+        1:  173:  memcpy(&state, &initialState, sizeof(struct gameState));
+        1:  174:  memcpy(&preState, &state, sizeof(struct gameState));
+        -:  175:  
+        -:  176:
+        1:  177:	result = mineCall(0, COPPERPOS, gold, 0, &state, HANDPOS, 0);
+        -:  178:  
+        -:  179:  /* Should not make any changes when choice2 is too costly */
+        1:  180:  testCount += 1;
+        1:  181:  passCount += fakeAssert(
+        -:  182:    "Should not change state when choice2 is too costly",
+        1:  183:    (compareState(&state, &preState, &gsc) == 0)
+        -:  184:  );
+        -:  185:
+        -:  186:  /* Should return -1 when choice2 is too costly */
+        1:  187:  testCount += 1;
+        1:  188:  passCount += fakeAssert(
+        -:  189:    "Should return -1 when choice2 is too costly",
+        -:  190:    (result == -1)
+        -:  191:  );
+        -:  192:
+        -:  193:  /* Test using a treasure card for choice1 and a treasure card that's up to
+        -:  194:     3 coins more (silver) */
+        1:  195:  printf("\n----Test #7: choice1 = copper, choice2 = silver----\n");
+        1:  196:  memcpy(&state, &initialState, sizeof(struct gameState));
+        1:  197:  memcpy(&preState, &state, sizeof(struct gameState));
+        -:  198:  
+        1:  199:	result = mineCall(0, COPPERPOS, silver, 0, &state, HANDPOS, 0);
+        1:  200:  compareState(&state, &preState, &gsc);
+        -:  201:
+        -:  202:  /* Should add choice2 card to hand */
+        1:  203:  testCount += 1;
+        1:  204:  passCount += fakeAssert(
+        -:  205:    "Should add choice2 card to hand",
+        -:  206:    (containsCard(silver, state.hand[P1], state.handCount[P1]))
+        -:  207:  );
+        -:  208:
+        -:  209:  /* Should trash choice1 card */
+        1:  210:  testCount += 1;
+        2:  211:  passCount += fakeAssert(
+        -:  212:    "Should trash choice1 card",
+        1:  213:    (state.hand[P1][COPPERPOS] != copper
+        1:  214:    && !containsCard(copper, state.deck[P1], state.deckCount[P1])
+        1:  215:    && !containsCard(copper, state.discard[P1], state.discardCount[P1])
+        1:  216:    && !containsCard(copper, state.playedCards, state.playedCardCount))
+        -:  217:  );
+        -:  218:
+        -:  219:  /* Should only trash ONE instance of choice1 card */
+        1:  220:  testCount += 1;
+        1:  221:  passCount += fakeAssert(
+        -:  222:    "Should only affect one instance of choice1 card",
+        1:  223:    (state.hand[P1][COPPER2POS] == copper)
+        -:  224:  );
+        -:  225:
+        -:  226:  /* Should not affect other players */
+        1:  227:  testCount += 1;
+        2:  228:  passCount += fakeAssert(
+        -:  229:    "Should not affect other players",
+        1:  230:    (gsc.handChanged[P2] == 0
+        1:  231:    && gsc.deckChanged[P2] == 0
+        1:  232:    && gsc.discardChanged[P2] == 0
+        1:  233:    && state.handCount[P2] == preState.handCount[P2]
+        1:  234:    && state.deckCount[P2] == preState.deckCount[P2]
+        1:  235:    && state.discardCount[P2] == preState.discardCount[P2])
+        -:  236:  );
+        -:  237:
+        -:  238:  /* Should move played card to playedCards */
+        1:  239:  testCount += 1;
+        2:  240:  passCount += fakeAssert(
+        -:  241:    "Should move played card to playedCards",
+        1:  242:    (!containsCard(mine, state.hand[P1], state.handCount[P1])
+        1:  243:    && containsCard(mine, state.playedCards, state.playedCardCount))
+        -:  244:  );
+        -:  245:
+        -:  246:
+        1:  247:  failure = testCount-passCount;
+        -:  248:  
+        1:  249:  if(passCount==testCount){
+    #####:  250:		printf("\n\n\n >>>>>>ALL TESTS PASSED: mineCall() \n\n\n");
+        -:  251:	}
+        -:  252:	else{
+        1:  253:		printf("\n\n\n >>>>>>FAILURES IN MINE: %d \n\n\n", failure);
+        -:  254:	}
+        -:  255:
+        1:  256:  return 0;
+        -:  257:}
+        -:  258:
+        1:  259:int main() {
+        1:  260:  testMine();
+        1:  261:  return 0;
+        -:  262:}

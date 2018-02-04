@@ -1,0 +1,136 @@
+        -:    0:Source:unittest4.c
+        -:    0:Graph:unittest4.gcno
+        -:    0:Data:unittest4.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:/******************************************************************************
+        -:    2: * Author: Jonathan Grocott
+        -:    3: * Description: updateCoins function unit tests in dominion.c. 
+        -:    4: * Date Created: 1/29/2018
+        -:    5: *****************************************************************************/
+        -:    6: 
+        -:    7:#include <stdio.h>
+        -:    8:#include <assert.h>
+        -:    9:#include <stdlib.h>
+        -:   10:#include <string.h>
+        -:   11:#include "dominion.h"
+        -:   12:#include "dominion_helpers.h"
+        -:   13:#include "rngs.h"
+        -:   14:#include "interface.h"
+        -:   15:#include "testTools.c"
+        -:   16:
+        1:   17:int main() {
+        -:   18:	struct gameState state,	stateOriginal;	// backup copy of game to detect changes
+        1:   19:	int i = 0,						
+        1:   20:		numPlayers = 2,				// number of players in game
+        1:   21:		randomSeed = 1000,			// seed for random generation
+        1:   22:		validationCheck = 1;		// used to determine pass or fail
+        1:   23:	int failure = 0; 
+        -:   24:	
+        -:   25:	// initial array of kingdom cards
+        1:   26:	int kingdomCards[10] = {adventurer, gardens, village, minion, mine, cutpurse,
+        -:   27:							sea_hag, remodel, smithy};
+        -:   28:	
+        -:   29:	// Initializing game and backup copy of game
+        1:   30:	initializeGame(numPlayers, kingdomCards, randomSeed, &state);
+        -:   31:
+        -:   32:
+        6:   33:	for (i = 0; i < 5; i++) {
+        5:   34:		state.hand[state.whoseTurn][i] = copper;
+        -:   35:	}
+        1:   36:	updateCoins(state.whoseTurn, &state, 0);
+        -:   37:
+        -:   38:	// DISPLAY
+        1:   39:	printf("\n\n-----------------------------------------");
+        1:   40:    printf("\n--------Testing updateCoins()----------\n\n");
+        -:   41:
+        1:   42:	printf("----Test #1: Placed five copper cards in player hand, should be 5----\n");
+        1:   43:	validationCheck = 1;
+        1:   44:	if (state.coins != 5){
+    #####:   45:		failure = 1; 
+    #####:   46:		validationCheck = 0;
+        -:   47:	}
+        1:   48:	printTestResult(validationCheck, 5, 5);
+        -:   49:
+        1:   50:	printf("\n----Test #2: Placed six silver cards in player hand, set handCount to 6, should be 12---\n");
+        1:   51:	validationCheck = 1;
+        7:   52:	for (i = 0; i < 6; i++) {
+        6:   53:		state.hand[state.whoseTurn][i] = silver;
+        -:   54:	}
+        1:   55:	state.handCount[state.whoseTurn] = 6;
+        1:   56:	updateCoins(state.whoseTurn, &state, 0);
+        1:   57:	if (state.coins != 12){
+    #####:   58:		failure = 1; 
+    #####:   59:		validationCheck = 0;
+        -:   60:	}
+        1:   61:	printTestResult(validationCheck, 12, 12);
+        -:   62:
+        1:   63:	printf("\n----Test #3: Copper, 2 Silver, 2 Gold, set handCount to 5, should be 11----\n");
+        1:   64:	validationCheck = 1;
+        1:   65:	state.handCount[state.whoseTurn] = 5;
+        1:   66:	state.hand[state.whoseTurn][0] = copper;
+        1:   67:	state.hand[state.whoseTurn][1] = silver;
+        1:   68:	state.hand[state.whoseTurn][2] = silver;
+        1:   69:	state.hand[state.whoseTurn][3] = gold;
+        1:   70:	state.hand[state.whoseTurn][4] = gold;
+        1:   71:	updateCoins(state.whoseTurn, &state, 0);
+        1:   72:	if (state.coins != 11){
+    #####:   73:		failure = 1; 
+    #####:   74:		validationCheck = 0;
+        -:   75:	}
+        1:   76:	printTestResult(validationCheck, 11, 11);
+        -:   77:
+        1:   78:	printf("\n----Test #4: Setting hand count to 4, should only read value of top 4 cards = 8----\n");
+        1:   79:	validationCheck = 1;
+        1:   80:	state.handCount[state.whoseTurn] = 4;
+        1:   81:	updateCoins(state.whoseTurn, &state, 0);
+        1:   82:	if (state.coins != 8){
+    #####:   83:		failure = 1; 
+    #####:   84:		validationCheck = 0;
+        -:   85:	}
+        1:   86:	printTestResult(validationCheck, 8, 8);
+        -:   87:	
+        1:   88:	printf("\n----Test #5: Including bonus of 5, should result in 8 + 5 = 13----\n");
+        1:   89:	validationCheck = 1;
+        1:   90:	updateCoins(state.whoseTurn, &state, 5);
+        1:   91:	if (state.coins != 13){
+    #####:   92:		failure = 1; 
+    #####:   93:		validationCheck = 0;
+        -:   94:	}
+        1:   95:	printTestResult(validationCheck, 13, 13);
+        -:   96:	
+        1:   97:	printf("\n----Test #6: updateCoins only accesses cards, card piles should be unchanged----\n");
+        1:   98:	validationCheck = 1;
+        1:   99:	if (isHandSame(&state, &stateOriginal, 0) != 1){
+    #####:  100:		failure = 1; 
+    #####:  101:		validationCheck = 0;
+        -:  102:	}
+        1:  103:	if (isHandSame(&state, &stateOriginal, 0) != 1){
+    #####:  104:		failure = 1; 
+    #####:  105:		validationCheck = 0;
+        -:  106:	}
+        1:  107:	if (isDeckSame(&state, &stateOriginal, 0) != 1){
+    #####:  108:		failure = 1; 
+    #####:  109:		validationCheck = 0;
+        -:  110:	}
+        1:  111:	if (isDeckSame(&state, &stateOriginal, 0) != 1){
+    #####:  112:		failure = 1; 
+    #####:  113:		validationCheck = 0;
+        -:  114:	}
+        1:  115:	if (isDiscardSame(&state, &stateOriginal, 0) != 1){
+    #####:  116:		failure = 1; 
+    #####:  117:		validationCheck = 0;
+        -:  118:	}
+        1:  119:	if (isDiscardSame(&state, &stateOriginal, 0) != 1){
+    #####:  120:		failure = 1; 
+    #####:  121:		validationCheck = 0;
+        -:  122:	}
+        1:  123:	printTestResult(validationCheck, 1, 1);
+        -:  124:
+        1:  125:	if(failure != 1){
+        1:  126:		printf("\n\n\n >>>>>>ALL TESTS PASSED: updateCoins() \n\n\n");
+        -:  127:	}
+        -:  128:	
+        -:  129:	
+        1:  130:	return 0;
+        -:  131:}

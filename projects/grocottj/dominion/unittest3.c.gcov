@@ -1,0 +1,121 @@
+        -:    0:Source:unittest3.c
+        -:    0:Graph:unittest3.gcno
+        -:    0:Data:unittest3.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:/* -----------------------------------------------------------------------
+        -:    2: * Author: Jonathan Grocott
+        -:    3: * Description: Unit tests for the isGameOver(struct gameState *state) 
+        -:    4:	function in dominion.c. 
+        -:    5: * File Name: unittest3.c
+        -:    6: * Date Created: 1/31/2018
+        -:    7: * -----------------------------------------------------------------------*/
+        -:    8:#include "dominion.h"
+        -:    9:#include "dominion_helpers.h"
+        -:   10:#include <string.h>
+        -:   11:#include <stdio.h>
+        -:   12:#include "rngs.h"
+        -:   13:
+        1:   14:int main() {
+        -:   15:
+        1:   16:	int k[10] = {adventurer, council_room, feast, gardens, mine
+        -:   17:               , remodel, smithy, village, baron, great_hall};
+        -:   18:    struct gameState test;
+        -:   19:
+        1:   20:    int seed = 1000;
+        1:   21:    int totalPlayers = 2;
+        -:   22:    int result;
+        1:   23:	int failure = 0; 
+        -:   24:	
+        1:   25:	printf("\n\n-----------------------------------------");
+        1:   26:    printf("\n--------Testing isGameOver()----------\n\n");
+        -:   27:
+        1:   28:    printf("----Test #1: isGameOver() testing for no state change----");
+        -:   29:
+        1:   30:    memset(&test, 23, sizeof(struct gameState));   // clear the game state
+        -:   31:	 
+        1:   32:    initializeGame(totalPlayers, k, seed, &test); // initialize a new game
+        -:   33:
+        1:   34:    result = isGameOver(&test);
+        -:   35:
+        1:   36:    if(result == 0){
+        1:   37:    	printf("\nSUCCESS: No change in game state");
+        -:   38:    }
+        -:   39:    else{
+    #####:   40:    	printf("\n	Fail: Game should not end");
+    #####:   41:		failure = 1;
+        -:   42:    }
+        -:   43:
+        1:   44:    printf("\n\n----Test #2: isGameOver() testing when province = 0----");
+        -:   45:
+        1:   46:    memset(&test, 23, sizeof(struct gameState));   // clear the game state
+        -:   47: 
+        1:   48:    initializeGame(totalPlayers, k, seed, &test); // initialize a new game
+        1:   49:    test.supplyCount[province] = 0;
+        1:   50:    result = isGameOver(&test);
+        -:   51:
+        1:   52:    if(result == 1){
+        1:   53:    	printf("\nSUCCESS: Province is out of supply: game ends");
+        -:   54:    }
+        -:   55:    else{
+    #####:   56:    	printf("\n	Fail: Game was suppose to end");
+    #####:   57:		failure = 1;
+        -:   58:    }
+        1:   59:    printf("\n\n----Test #3: isGameOver() testing when province = 1----");
+        -:   60:
+        1:   61:    memset(&test, 23, sizeof(struct gameState));   // clear the game state
+        -:   62:
+        1:   63:    initializeGame(totalPlayers, k, seed, &test); // initialize a new game
+        1:   64:    test.supplyCount[province] = 1;
+        -:   65:
+        1:   66:    result = isGameOver(&test);
+        -:   67:
+        1:   68:    if(result == 0){
+        1:   69:    	printf("\nSUCCESS: Province has 1 card left: game continues");
+        -:   70:    }
+        -:   71:    else{
+    #####:   72:    	printf("\n	Fail: Game was not suppose to end");
+    #####:   73:		failure = 1;
+        -:   74:    }
+        -:   75:
+        1:   76:    printf("\n\n----Test #4: isGameOver() testing when province = 1, supply count is 0----");
+        1:   77:    test.supplyCount[adventurer] = 0;
+        1:   78:    result = isGameOver(&test);
+        -:   79:
+        1:   80:    if(result == 0){
+        1:   81:    	printf("\nSUCCESS: Game continued");
+        -:   82:    }
+        -:   83:    else{
+    #####:   84:    	printf("\n	Fail: Game was not suppose to end");
+    #####:   85:		failure = 1;
+        -:   86:    }
+        1:   87:    printf("\n\n----Test #5: isGameOver() testing when province = 1, two supply count is 0----");
+        1:   88:    test.supplyCount[smithy] = 0;
+        1:   89:    result = isGameOver(&test);
+        -:   90:
+        1:   91:    if(result == 0){
+        1:   92:    	printf("\nSUCCESS: Game continued");
+        -:   93:    }
+        -:   94:    else{
+    #####:   95:    	printf("\n	Fail: Game was not suppose to end");
+    #####:   96:		failure = 1;
+        -:   97:    }
+        1:   98:    printf("\n\n----Test #6: isGameOver() testing when province = 1, three supply count is 0----");
+        1:   99:    test.supplyCount[feast] = 0;
+        1:  100:    result = isGameOver(&test);
+        -:  101:
+        1:  102:    if(result == 1){
+        1:  103:    	printf("\nSUCCESS: Game ended");
+        -:  104:    }
+        -:  105:    else{
+    #####:  106:    	printf("\n	Fail: Game was suppose to end");
+    #####:  107:		failure = 1;
+        -:  108:    }
+        -:  109:	
+        1:  110:	if(failure != 1){
+        1:  111:		printf("\n\n\n >>>>>>ALL TESTS PASSED: isGameOver() \n\n\n");
+        -:  112:	}
+        -:  113:
+        1:  114:	return 0;
+        -:  115: 
+        -:  116:}
