@@ -1,0 +1,88 @@
+        -:    0:Source:randomtestcard1.c
+        -:    0:Graph:randomtestcard1.gcno
+        -:    0:Data:randomtestcard1.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:/******************************************************************************
+        -:    2: * Author: Jonathan Grocott
+        -:    3: * Description: Random test for the smithy card in dominion.c
+        -:    4: * Date Created: 2/13/2018
+        -:    5: *****************************************************************************/
+        -:    6: 
+        -:    7:#include <stdlib.h>
+        -:    8:#include <stdio.h>
+        -:    9:#include <math.h>
+        -:   10:#include <time.h>
+        -:   11:#include <string.h>
+        -:   12:#include "dominion_helpers.h"
+        -:   13:#include "rngs.h"
+        -:   14:#include "testTools.h"
+        -:   15:#include "testTools.c"
+        -:   16:
+        -:   17:
+        -:   18://Bit to set the printf statements on/off
+        -:   19:#define NOISY_TEST 1
+        -:   20:
+        -:   21:
+function main called 1 returned 100% blocks executed 70%
+        1:   22:int main() {
+        -:   23:    
+        1:   24:	srand(time(NULL));
+call    0 returned 100%
+call    1 returned 100%
+        1:   25:    struct errors e = {0};
+        -:   26:
+        -:   27:#if (NOISY_TEST == 1)
+        1:   28:	printf("\n**************************\n");
+call    0 returned 100%
+        1:   29:    printf("TESTING SMITHY CARD\n");
+call    0 returned 100%
+        1:   30:	printf("**************************\n");
+call    0 returned 100%
+        1:   31:	printf("EXECUTING %d RANDOM TESTS....\n", NUMTESTS);
+call    0 returned 100%
+        -:   32:#endif
+        -:   33:	//For each test randomize the game state and test
+    10001:   34:    for (int i = 0; i < NUMTESTS; i++) {
+branch  0 taken 99%
+branch  1 taken 1% (fallthrough)
+        -:   35:		struct gameState state;
+    10000:   36:		randomizeGameState(&state);
+call    0 returned 100%
+    10000:   37:		engine_testSmithy(&state, &e);
+call    0 returned 100%
+        -:   38:    }
+        -:   39:
+        -:   40:	//If there are failures print them
+        1:   41:    if (e.metric1 + e.metric2 + e.metric3 + e.metric4 + e.metric5 > 0){
+branch  0 taken 0% (fallthrough)
+branch  1 taken 100%
+        -:   42:		#if (NOISY_TEST == 1)
+    #####:   43:			printf("\nTESTS FAILED, Details Below\n");
+call    0 never executed
+    #####:   44:			printf("\n*****ERROR RATES*****\n");
+call    0 never executed
+    #####:   45:			printf("PLAYER CARD COUNT: %.2f%%\n", e.metric1 * 1.0 / NUMTESTS * 100);
+call    0 never executed
+    #####:   46:			printf("PLAYER HAND COUNT: %.2f%%\n", e.metric2 * 1.0 / NUMTESTS * 100);
+call    0 never executed
+    #####:   47:			printf("DECK COUNT: %.2f%%\n", e.metric3 * 1.0 / NUMTESTS * 100);
+call    0 never executed
+    #####:   48:			printf("OPPONENT CARD COUNT: %.2f%%\n", e.metric4 * 1.0 / NUMTESTS * 100);
+call    0 never executed
+    #####:   49:			printf("**************************\n\n");
+call    0 never executed
+        -:   50:		#endif
+        -:   51:	}
+        -:   52:    else{
+        -:   53:		//If no failures print all tests passed 
+        -:   54:		#if (NOISY_TEST == 1)
+        1:   55:		printf(">>> ALL %d TESTS PASSED\n", NUMTESTS);
+call    0 returned 100%
+        1:   56:		printf("**************************\n\n");
+call    0 returned 100%
+        -:   57:		#endif
+        -:   58:	}
+        -:   59:		
+        1:   60:    return 0;
+        -:   61:}

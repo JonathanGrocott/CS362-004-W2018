@@ -1,0 +1,426 @@
+        -:    0:Source:testTools.c
+        -:    0:Graph:randomtestcard2.gcno
+        -:    0:Data:randomtestcard2.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include <stdio.h>
+        -:    2:#include <math.h>
+        -:    3:#include <string.h>
+        -:    4:#include "testTools.h"
+        -:    5:#include "dominion.h"
+        -:    6:
+        -:    7: //Set global vars 
+        -:    8:#define NUMTESTS 10000
+        -:    9:#define MINCARDS 3
+        -:   10:
+function engine_testSmithy called 0 returned 0% blocks executed 0%
+    #####:   11:void engine_testSmithy(struct gameState *pre, struct errors *e) {
+        -:   12:
+        -:   13:    int handPosition;  
+        -:   14:    int choice1, choice2, choice3;  
+        -:   15:    int bonus;  
+        -:   16:
+        -:   17:    // test variables
+    #####:   18:    int playerNumber = pre->whoseTurn;
+        -:   19:    struct gameState post;
+        -:   20:    int i;
+        -:   21:
+    #####:   22:    handPosition = randInt(0, pre->handCount[playerNumber]);
+call    0 never executed
+    #####:   23:    pre->hand[playerNumber][handPosition] = smithy;
+        -:   24:
+    #####:   25:    memcpy(&post, pre, sizeof(struct gameState));
+        -:   26:
+    #####:   27:    bonus = randInt(0, MAX_DECK);
+call    0 never executed
+    #####:   28:    choice1 = randInt(curse, treasure_map);
+call    0 never executed
+    #####:   29:    choice2 = randInt(curse, treasure_map);
+call    0 never executed
+    #####:   30:    choice3 = randInt(curse, treasure_map);
+call    0 never executed
+        -:   31:
+        -:   32:	//Call card effect with smithy and randoms
+    #####:   33:    cardEffect(smithy, choice1, choice2, choice3, &post, handPosition, &bonus); 
+call    0 never executed
+        -:   34:
+        -:   35:
+        -:   36:	//Testing that post played hand should increment +1
+    #####:   37:    if (pre->playedCardCount + 1 != post.playedCardCount){
+branch  0 never executed
+branch  1 never executed
+    #####:   38:		e->metric1++;
+        -:   39:		#if (NOISY_TEST == 1)
+        -:   40:			printf("TEST FAILED: Player hand not incremented by 1.\n");
+        -:   41:        #endif
+        -:   42:	}
+        -:   43:	
+        -:   44:	//Testing that post played hand count incremented +2
+    #####:   45:    if (pre->handCount[playerNumber] + 2 != post.handCount[playerNumber]){
+branch  0 never executed
+branch  1 never executed
+    #####:   46:		e->metric2++;
+        -:   47:		#if (NOISY_TEST == 1)
+        -:   48:			printf("TEST FAILED: Post played hand count not +2.\n");
+        -:   49:        #endif
+        -:   50:	}
+        -:   51:
+        -:   52:	//Testing that post played deck decremented by 3
+    #####:   53:    if (pre->deckCount[playerNumber] - 3 != post.deckCount[playerNumber]){
+branch  0 never executed
+branch  1 never executed
+    #####:   54:		e->metric3++;
+        -:   55:		#if (NOISY_TEST == 1)
+        -:   56:			printf("TEST FAILED: Post played deck not -3.\n");
+        -:   57:        #endif
+        -:   58:	}
+        -:   59:	
+        -:   60:    //Test that opponent card count is unchanged
+    #####:   61:    for (i = 0; i < pre->numPlayers; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:   62:		if (i == playerNumber) continue;
+branch  0 never executed
+branch  1 never executed
+        -:   63:		else {
+    #####:   64:			if (pre->deckCount[i] != post.deckCount[i] || pre->handCount[i] != post.handCount[i] || pre->discardCount[i] != post.discardCount[i]){
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:   65:				e->metric4++; 
+        -:   66:				#if (NOISY_TEST == 1)
+        -:   67:					printf("TEST FAILED: Opponent card count changed.\n");
+        -:   68:				#endif
+        -:   69:			}			
+        -:   70:		}
+        -:   71:    }
+    #####:   72:}
+        -:   73:
+function randomizeGameState called 0 returned 0% blocks executed 0%
+    #####:   74:void randomizeGameState(struct gameState *state) {
+        -:   75:    
+    #####:   76:	int numPlayers = randInt(2, MAX_PLAYERS); // range 0 - MAX_PLAYERS
+call    0 never executed
+    #####:   77:    int playerNumber = randInt(0, numPlayers);  // range 0 - numPlayers
+call    0 never executed
+        -:   78:    int i;
+        -:   79:	
+        -:   80:    // assign randoms, from the class lecture
+    #####:   81:    for (i = 0; i < sizeof(struct gameState); i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:   82:		((char*)state)[i] = floor(Random() * 256);
+call    0 never executed
+        -:   83:    }
+        -:   84:
+        -:   85:    // assign reasonable values
+    #####:   86:    state->deckCount[playerNumber] = randInt(MINCARDS, MAX_DECK);
+call    0 never executed
+    #####:   87:    state->discardCount[playerNumber] = randInt(0, MAX_DECK - state->deckCount[playerNumber]);
+call    0 never executed
+    #####:   88:    state->handCount[playerNumber] = randInt(0, MAX_DECK - state->deckCount[playerNumber] - state->discardCount[playerNumber]);
+call    0 never executed
+    #####:   89:    state->playedCardCount = 0; 
+    #####:   90:    state->numPlayers = numPlayers;
+    #####:   91:    state->whoseTurn = playerNumber;
+        -:   92:
+        -:   93:    // assign random cards to deck, discard pile, and hand
+    #####:   94:    for (i = 0; i < state->deckCount[playerNumber]; i++)
+branch  0 never executed
+branch  1 never executed
+    #####:   95:	state->deck[playerNumber][i] = randInt(curse, treasure_map);
+call    0 never executed
+    #####:   96:    for (i = 0; i < state->discardCount[playerNumber]; i++)
+branch  0 never executed
+branch  1 never executed
+    #####:   97:	state->discard[playerNumber][i] = randInt(curse, treasure_map);
+call    0 never executed
+    #####:   98:    for (i = 0; i < state->handCount[playerNumber]; i++)
+branch  0 never executed
+branch  1 never executed
+    #####:   99:	state->hand[playerNumber][i] = randInt(curse, treasure_map);
+call    0 never executed
+    #####:  100:}
+        -:  101:
+        -:  102://Returns a random int between two #'s
+function randInt called 0 returned 0% blocks executed 0%
+    #####:  103:int randInt(int low, int high) {
+    #####:  104:    double r = rand();
+call    0 never executed
+    #####:  105:    return (int)(low + r * (high - low) / (double)RAND_MAX);
+        -:  106:}
+        -:  107:
+        -:  108:
+function containsCard called 0 returned 0% blocks executed 0%
+    #####:  109:int containsCard(int card, int array[], int arrayCount) {
+    #####:  110:  int i = 0;
+        -:  111:
+    #####:  112:  for (i = 0; i < arrayCount; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  113:    if (array[i] == card) {
+branch  0 never executed
+branch  1 never executed
+        -:  114:      /* Return 1 (found) if the card exists in the location */
+    #####:  115:      return 1;
+        -:  116:    }
+        -:  117:  }
+        -:  118:
+    #####:  119:  return 0;   
+        -:  120:}
+        -:  121:
+function isDiscardSame called 0 returned 0% blocks executed 0%
+    #####:  122:int isDiscardSame(struct gameState *state, struct gameState *stateOriginal, int player) {
+    #####:  123:	int i = 0;
+    #####:  124:	for (i = 0; i < stateOriginal->discardCount[player]; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  125:		if (stateOriginal->discard[player][i] != state->discard[player][i])
+branch  0 never executed
+branch  1 never executed
+    #####:  126:			return 0;
+        -:  127:	}
+        -:  128:
+    #####:  129:	return 1;
+        -:  130:}
+        -:  131:
+function isHandSame called 0 returned 0% blocks executed 0%
+    #####:  132:int isHandSame(struct gameState *state, struct gameState *stateOriginal, int player) {
+    #####:  133:	int i = 0;
+    #####:  134:	for (i = 0; i < stateOriginal->handCount[player]; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  135:		if (stateOriginal->hand[player][i] != state->hand[player][i])
+branch  0 never executed
+branch  1 never executed
+    #####:  136:			return 0;
+        -:  137:	}
+        -:  138:
+    #####:  139:	return 1;
+        -:  140:}
+        -:  141:
+function isDeckSame called 0 returned 0% blocks executed 0%
+    #####:  142:int isDeckSame(struct gameState *state, struct gameState *stateOriginal, int player) {
+    #####:  143:	int i = 0;
+    #####:  144:	for (i = 0; i < stateOriginal->deckCount[player]; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  145:		if (stateOriginal->deck[player][i] != state->deck[player][i])
+branch  0 never executed
+branch  1 never executed
+    #####:  146:			return 0;
+        -:  147:	}
+        -:  148:
+    #####:  149:	return 1;
+        -:  150:}
+        -:  151:
+function printTestResult called 0 returned 0% blocks executed 0%
+    #####:  152:void printTestResult(int validationCheck, int expected, int actual) {
+    #####:  153:	if (validationCheck == 1)
+branch  0 never executed
+branch  1 never executed
+    #####:  154:		printf("SUCCESS: ");
+call    0 never executed
+        -:  155:	else
+    #####:  156:		printf("FAIL: ");
+call    0 never executed
+    #####:  157:	if (expected != -1) {
+branch  0 never executed
+branch  1 never executed
+    #####:  158:		printf("Expected value: %i,  ", expected);
+call    0 never executed
+    #####:  159:		printf("Actual value: %i\n", actual);
+call    0 never executed
+        -:  160:	}
+    #####:  161:}
+        -:  162:
+function fakeAssert called 0 returned 0% blocks executed 0%
+    #####:  163:int fakeAssert(char condition[], int result) {
+        -:  164:
+    #####:  165:  if (result) {
+branch  0 never executed
+branch  1 never executed
+    #####:  166:    printf("SUCCESS: %s\n", condition);
+call    0 never executed
+    #####:  167:    return 1;
+        -:  168:  } else {
+    #####:  169:    printf("FAIL: %s\n", condition);
+call    0 never executed
+    #####:  170:    return 0;
+        -:  171:  }
+        -:  172:}
+        -:  173:
+        -:  174:
+function compareState called 0 returned 0% blocks executed 0%
+    #####:  175:int compareState(
+        -:  176:  struct gameState *a,
+        -:  177:  struct gameState *b,
+        -:  178:  struct gameStateComparison *gsc
+        -:  179:) {
+    #####:  180:  int i = 0, j = 0;
+    #####:  181:  int changed = 0;
+        -:  182:
+        -:  183:  /* Compare all the gameState members and assign the result to the matching
+        -:  184:     gameStateComparison member */
+    #####:  185:  gsc->numPlayers = (a->numPlayers == b->numPlayers) ? 0 : 1;
+        -:  186:
+    #####:  187:  for (i = 0; i < treasure_map+1; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  188:    gsc->supplyCount[i] = (a->supplyCount[i] == b->supplyCount[i]) ? 0 : 1;
+        -:  189:
+    #####:  190:    changed = changed || gsc->supplyCount[i];
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  191:  }
+        -:  192:
+    #####:  193:  for (i = 0; i < treasure_map+1; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  194:    gsc->embargoTokens[i] =
+    #####:  195:      (a->embargoTokens[i] == b->embargoTokens[i]) ? 0 : 1;
+        -:  196:
+    #####:  197:    changed = changed || gsc->embargoTokens[i];
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  198:  }
+        -:  199:
+    #####:  200:  gsc->outpostPlayed = (a->outpostPlayed == b->outpostPlayed) ? 0 : 1;
+    #####:  201:  gsc->outpostTurn = (a->outpostTurn == b->outpostTurn) ? 0 : 1;
+    #####:  202:  gsc->whoseTurn = (a->whoseTurn == b->whoseTurn) ? 0 : 1;
+    #####:  203:  gsc->phase = (a->phase == b->phase) ? 0 : 1;
+    #####:  204:  gsc->numActions = (a->numActions == b->numActions) ? 0 : 1;
+    #####:  205:  gsc->coins = (a->coins == b->coins) ? 0 : 1;
+    #####:  206:  gsc->numBuys = (a->numBuys == b->numBuys) ? 0 : 1;
+        -:  207:
+    #####:  208:  for (i = 0; i < MAX_PLAYERS; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  209:    for (j = 0; j < MAX_HAND; j++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  210:      if (a->hand[i][j] == b->hand[i][j]) {
+branch  0 never executed
+branch  1 never executed
+    #####:  211:        gsc->hand[i][j] = 0;
+        -:  212:      } else {
+    #####:  213:        gsc->hand[i][j] = 1;
+    #####:  214:        gsc->handChanged[i] = 1;
+        -:  215:      }
+        -:  216:
+    #####:  217:      changed = changed || gsc->hand[i][j];
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  218:    }
+        -:  219:  }
+        -:  220:
+    #####:  221:  for (i = 0; i < MAX_PLAYERS; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  222:    for (j = 0; j < MAX_DECK; j++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  223:      if (a->deck[i][j] == b->deck[i][j]) {
+branch  0 never executed
+branch  1 never executed
+    #####:  224:        gsc->deck[i][j] = 0;
+        -:  225:      } else {
+    #####:  226:        gsc->deck[i][j] = 1;
+    #####:  227:        gsc->deckChanged[i] = 1;
+        -:  228:      }
+        -:  229:
+    #####:  230:      if (a->discard[i][j] == b->discard[i][j]) {
+branch  0 never executed
+branch  1 never executed
+    #####:  231:        gsc->discard[i][j] = 0;
+        -:  232:      } else {
+    #####:  233:        gsc->discard[i][j] = 1;
+    #####:  234:        gsc->discardChanged[i] = 1;
+        -:  235:      }
+        -:  236:
+    #####:  237:      changed = changed || gsc->deck[i][j] || gsc->deckChanged[i]
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  238:        || gsc->discard[i][j] || gsc->discardChanged[i];
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+        -:  239:    }
+        -:  240:  }
+        -:  241:
+    #####:  242:  for (i = 0; i < MAX_PLAYERS; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  243:    gsc->handCount[i] = (a->handCount[i] == b->handCount[i]) ? 0 : 1;
+    #####:  244:    gsc->deckCount[i] = (a->deckCount[i] == b->deckCount[i]) ? 0 : 1;
+    #####:  245:    gsc->discardCount[i] = (a->discardCount[i] == b->discardCount[i]) ? 0 : 1;
+        -:  246:
+    #####:  247:    changed = changed || gsc->handCount[i] || gsc->deckCount[i]
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  248:      || gsc->discardCount[i];
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  249:  }
+        -:  250:
+    #####:  251:  for (i = 0; i < MAX_DECK; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  252:    gsc->playedCards[i] = (a->playedCards[i] == b->playedCards[i]) ? 0 : 1;
+        -:  253:
+    #####:  254:    changed = changed || gsc->playedCards[i];
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  255:  }
+        -:  256:
+    #####:  257:  gsc->playedCardCount = (a->playedCardCount == b->playedCardCount) ? 0 : 1;
+        -:  258:
+        -:  259:  /* Do one change calculation for all the non-looping members */
+    #####:  260:  changed = changed || gsc->numPlayers || gsc->outpostPlayed
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  261:    || gsc->outpostTurn || gsc->whoseTurn || gsc->phase || gsc->numActions
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+    #####:  262:    || gsc->coins || gsc->numBuys || gsc->playedCardCount;
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+        -:  263:
+        -:  264:  /* Return the overall status of whether anything changed */
+    #####:  265:  return changed;
+        -:  266:}
+        -:  267:
