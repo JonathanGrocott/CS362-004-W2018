@@ -1,0 +1,169 @@
+        -:    0:Source:testTools.c
+        -:    0:Graph:cardtest4.gcno
+        -:    0:Data:cardtest4.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include <stdio.h>
+        -:    2:#include <string.h>
+        -:    3:#include "testTools.h"
+        -:    4:#include "dominion.h"
+        -:    5:
+        6:    6:int containsCard(int card, int array[], int arrayCount) {
+        6:    7:  int i = 0;
+        -:    8:
+       16:    9:  for (i = 0; i < arrayCount; i++) {
+       13:   10:    if (array[i] == card) {
+        -:   11:      /* Return 1 (found) if the card exists in the location */
+        3:   12:      return 1;
+        -:   13:    }
+        -:   14:  }
+        -:   15:
+        3:   16:  return 0;   
+        -:   17:}
+        -:   18:
+    #####:   19:int isDiscardSame(struct gameState *state, struct gameState *stateOriginal, int player) {
+    #####:   20:	int i = 0;
+    #####:   21:	for (i = 0; i < stateOriginal->discardCount[player]; i++) {
+    #####:   22:		if (stateOriginal->discard[player][i] != state->discard[player][i])
+    #####:   23:			return 0;
+        -:   24:	}
+        -:   25:
+    #####:   26:	return 1;
+        -:   27:}
+        -:   28:
+    #####:   29:int isHandSame(struct gameState *state, struct gameState *stateOriginal, int player) {
+    #####:   30:	int i = 0;
+    #####:   31:	for (i = 0; i < stateOriginal->handCount[player]; i++) {
+    #####:   32:		if (stateOriginal->hand[player][i] != state->hand[player][i])
+    #####:   33:			return 0;
+        -:   34:	}
+        -:   35:
+    #####:   36:	return 1;
+        -:   37:}
+        -:   38:
+    #####:   39:int isDeckSame(struct gameState *state, struct gameState *stateOriginal, int player) {
+    #####:   40:	int i = 0;
+    #####:   41:	for (i = 0; i < stateOriginal->deckCount[player]; i++) {
+    #####:   42:		if (stateOriginal->deck[player][i] != state->deck[player][i])
+    #####:   43:			return 0;
+        -:   44:	}
+        -:   45:
+    #####:   46:	return 1;
+        -:   47:}
+        -:   48:
+    #####:   49:void printTestResult(int validationCheck, int expected, int actual) {
+    #####:   50:	if (validationCheck == 1)
+    #####:   51:		printf("SUCCESS: ");
+        -:   52:	else
+    #####:   53:		printf("FAIL: ");
+    #####:   54:	if (expected != -1) {
+    #####:   55:		printf("Expected value: %i,  ", expected);
+    #####:   56:		printf("Actual value: %i\n", actual);
+        -:   57:	}
+    #####:   58:}
+        -:   59:
+       17:   60:int fakeAssert(char condition[], int result) {
+        -:   61:
+       17:   62:  if (result) {
+       16:   63:    printf("SUCCESS: %s\n", condition);
+       16:   64:    return 1;
+        -:   65:  } else {
+        1:   66:    printf("FAIL: %s\n", condition);
+        1:   67:    return 0;
+        -:   68:  }
+        -:   69:}
+        -:   70:
+        -:   71:
+        7:   72:int compareState(
+        -:   73:  struct gameState *a,
+        -:   74:  struct gameState *b,
+        -:   75:  struct gameStateComparison *gsc
+        -:   76:) {
+        7:   77:  int i = 0, j = 0;
+        7:   78:  int changed = 0;
+        -:   79:
+        -:   80:  /* Compare all the gameState members and assign the result to the matching
+        -:   81:     gameStateComparison member */
+        7:   82:  gsc->numPlayers = (a->numPlayers == b->numPlayers) ? 0 : 1;
+        -:   83:
+      196:   84:  for (i = 0; i < treasure_map+1; i++) {
+      189:   85:    gsc->supplyCount[i] = (a->supplyCount[i] == b->supplyCount[i]) ? 0 : 1;
+        -:   86:
+      189:   87:    changed = changed || gsc->supplyCount[i];
+        -:   88:  }
+        -:   89:
+      196:   90:  for (i = 0; i < treasure_map+1; i++) {
+      189:   91:    gsc->embargoTokens[i] =
+      189:   92:      (a->embargoTokens[i] == b->embargoTokens[i]) ? 0 : 1;
+        -:   93:
+      189:   94:    changed = changed || gsc->embargoTokens[i];
+        -:   95:  }
+        -:   96:
+        7:   97:  gsc->outpostPlayed = (a->outpostPlayed == b->outpostPlayed) ? 0 : 1;
+        7:   98:  gsc->outpostTurn = (a->outpostTurn == b->outpostTurn) ? 0 : 1;
+        7:   99:  gsc->whoseTurn = (a->whoseTurn == b->whoseTurn) ? 0 : 1;
+        7:  100:  gsc->phase = (a->phase == b->phase) ? 0 : 1;
+        7:  101:  gsc->numActions = (a->numActions == b->numActions) ? 0 : 1;
+        7:  102:  gsc->coins = (a->coins == b->coins) ? 0 : 1;
+        7:  103:  gsc->numBuys = (a->numBuys == b->numBuys) ? 0 : 1;
+        -:  104:
+       35:  105:  for (i = 0; i < MAX_PLAYERS; i++) {
+    14028:  106:    for (j = 0; j < MAX_HAND; j++) {
+    14000:  107:      if (a->hand[i][j] == b->hand[i][j]) {
+    13996:  108:        gsc->hand[i][j] = 0;
+        -:  109:      } else {
+        4:  110:        gsc->hand[i][j] = 1;
+        4:  111:        gsc->handChanged[i] = 1;
+        -:  112:      }
+        -:  113:
+    14000:  114:      changed = changed || gsc->hand[i][j];
+        -:  115:    }
+        -:  116:  }
+        -:  117:
+       35:  118:  for (i = 0; i < MAX_PLAYERS; i++) {
+    14028:  119:    for (j = 0; j < MAX_DECK; j++) {
+    14000:  120:      if (a->deck[i][j] == b->deck[i][j]) {
+    14000:  121:        gsc->deck[i][j] = 0;
+        -:  122:      } else {
+    #####:  123:        gsc->deck[i][j] = 1;
+    #####:  124:        gsc->deckChanged[i] = 1;
+        -:  125:      }
+        -:  126:
+    14000:  127:      if (a->discard[i][j] == b->discard[i][j]) {
+    14000:  128:        gsc->discard[i][j] = 0;
+        -:  129:      } else {
+    #####:  130:        gsc->discard[i][j] = 1;
+    #####:  131:        gsc->discardChanged[i] = 1;
+        -:  132:      }
+        -:  133:
+    26000:  134:      changed = changed || gsc->deck[i][j] || gsc->deckChanged[i]
+    26000:  135:        || gsc->discard[i][j] || gsc->discardChanged[i];
+        -:  136:    }
+        -:  137:  }
+        -:  138:
+       35:  139:  for (i = 0; i < MAX_PLAYERS; i++) {
+       28:  140:    gsc->handCount[i] = (a->handCount[i] == b->handCount[i]) ? 0 : 1;
+       28:  141:    gsc->deckCount[i] = (a->deckCount[i] == b->deckCount[i]) ? 0 : 1;
+       28:  142:    gsc->discardCount[i] = (a->discardCount[i] == b->discardCount[i]) ? 0 : 1;
+        -:  143:
+       52:  144:    changed = changed || gsc->handCount[i] || gsc->deckCount[i]
+       52:  145:      || gsc->discardCount[i];
+        -:  146:  }
+        -:  147:
+     3507:  148:  for (i = 0; i < MAX_DECK; i++) {
+     3500:  149:    gsc->playedCards[i] = (a->playedCards[i] == b->playedCards[i]) ? 0 : 1;
+        -:  150:
+     3500:  151:    changed = changed || gsc->playedCards[i];
+        -:  152:  }
+        -:  153:
+        7:  154:  gsc->playedCardCount = (a->playedCardCount == b->playedCardCount) ? 0 : 1;
+        -:  155:
+        -:  156:  /* Do one change calculation for all the non-looping members */
+       13:  157:  changed = changed || gsc->numPlayers || gsc->outpostPlayed
+        6:  158:    || gsc->outpostTurn || gsc->whoseTurn || gsc->phase || gsc->numActions
+       13:  159:    || gsc->coins || gsc->numBuys || gsc->playedCardCount;
+        -:  160:
+        -:  161:  /* Return the overall status of whether anything changed */
+        7:  162:  return changed;
+        -:  163:}
+        -:  164:

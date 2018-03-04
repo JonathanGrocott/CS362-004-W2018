@@ -1,0 +1,127 @@
+        -:    0:Source:cardtest2.c
+        -:    0:Graph:cardtest2.gcno
+        -:    0:Data:cardtest2.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:/******************************************************************************
+        -:    2: * Author: Jonathan Grocott
+        -:    3: * Description: Unit tests for the adventurer cardEffect function in dominion.c. 
+        -:    4: * File Name: cardtest2.c
+        -:    5: * Date Created: 1/29/2018
+        -:    6: *****************************************************************************/
+        -:    7:#include <stdio.h>
+        -:    8:#include <assert.h>
+        -:    9:#include <stdlib.h>
+        -:   10:#include <string.h>
+        -:   11:#include "dominion.h"
+        -:   12:#include "dominion_helpers.h"
+        -:   13:#include "rngs.h"
+        -:   14:#include "interface.h"
+        -:   15:#include "testTools.c"
+        -:   16:
+        1:   17:int main() {
+        -:   18:	struct gameState state,	stateOriginal;	// backup copy of game to detect changes
+        1:   19:	int i = 0,						// iteration variable for loop counting
+        1:   20:		numPlayers = 2,				// number of players in game
+        1:   21:		randomSeed = 10000,			// seed for random generation
+        1:   22:		validationCheck = 1,		// used to determine pass or fail
+        1:   23:		cardDrawn = 0,				// card selected from deck
+        1:   24:		count = 0,					// number of cards removed from player deck
+        1:   25:		drawntreasure = 0;			// determines number of cards drawn
+        1:   26:	int failure = 0; 
+        -:   27:	
+        -:   28:	// initial array of kingdom cards
+        1:   29:	int kingdomCards[10] = {adventurer, gardens, village, minion, mine, cutpurse,
+        -:   30:							sea_hag, remodel, smithy};
+        -:   31:	
+        -:   32:	// Initializing game and backup copy of game
+        1:   33:	initializeGame(numPlayers, kingdomCards, randomSeed, &state);
+        -:   34:
+        -:   35:	// PERFORMING OPERATIONS TO MEET TEST CONDITION
+        1:   36:	memcpy(&stateOriginal, &state, sizeof(struct gameState));
+        -:   37:
+        -:   38:
+        -:   39:	
+        1:   40:	printf("\n-----------------------------------------");
+        1:   41:    printf("\n--------Testing adventurerCall()----------\n\n");
+        1:   42:	printf("\n----Test #1: Non-treasure cards are successfully added to the discard pile----\n");
+        -:   43:	
+        -:   44:	
+        -:   45:	//Refactored for drew wolfe dominion assignment 5
+        1:   46:	adventurer_card(&state);
+        -:   47:	//adventurerCall(0, 0, 0, 0, &state, 0, 0);
+        -:   48:
+        -:   49:	
+        1:   50:	validationCheck = 1;
+        4:   51:	while (drawntreasure < 2) {
+        2:   52:		cardDrawn = stateOriginal.deck[state.whoseTurn][stateOriginal.deckCount[state.whoseTurn] - 1];
+        2:   53:		if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold) {
+        2:   54:			drawntreasure++;
+        2:   55:			count++;
+        -:   56:		} else {
+    #####:   57:			count++;
+        -:   58:		}
+        -:   59:	}
+        1:   60:	if (state.discardCount[state.whoseTurn] != stateOriginal.discardCount[state.whoseTurn] + (count - 2)){
+    #####:   61:		failure++;
+    #####:   62:		validationCheck = 0;
+        -:   63:	}
+        1:   64:	printTestResult(validationCheck, 1, 1);
+        -:   65:
+        1:   66:	printf("\n----Test #2: Two additional treasure cards are added to the player's hand----\n");
+        1:   67:	validationCheck = 1;
+        -:   68:	if (state.handCount[state.whoseTurn] != state.handCount[state.whoseTurn] + 2){
+        1:   69:		validationCheck = 0;
+        1:   70:		failure++;
+        -:   71:	}
+        1:   72:	if (!(state.hand[state.whoseTurn][state.handCount[state.whoseTurn] - 1] == copper ||
+    #####:   73:		state.hand[state.whoseTurn][state.handCount[state.whoseTurn] - 1] == silver ||
+    #####:   74:		state.hand[state.whoseTurn][state.handCount[state.whoseTurn] - 1] == gold)) {
+    #####:   75:		validationCheck = 0;
+    #####:   76:		failure++;
+        -:   77:	}
+        1:   78:	if (!(state.hand[state.whoseTurn][state.handCount[state.whoseTurn] - 2] == copper ||
+    #####:   79:		state.hand[state.whoseTurn][state.handCount[state.whoseTurn] - 2] == silver ||
+    #####:   80:		state.hand[state.whoseTurn][state.handCount[state.whoseTurn] - 2] == gold)) {
+    #####:   81:		validationCheck = 0;
+    #####:   82:		failure++;
+        -:   83:	}
+        1:   84:	printTestResult(validationCheck, 2, 0);
+        -:   85:
+        1:   86:	printf("\n----Test #3: Other Player's cards are not modified----\n");
+        1:   87:	validationCheck = 1;
+        1:   88:	if (isDeckSame(&state, &stateOriginal, state.whoseTurn + 1) != 1){
+    #####:   89:		validationCheck = 0;
+    #####:   90:		failure++;
+        -:   91:	}
+        1:   92:	if (isHandSame(&state, &stateOriginal, state.whoseTurn + 1) != 1){
+    #####:   93:		validationCheck = 0;
+    #####:   94:		failure++;
+        -:   95:	}
+        1:   96:	if (isDiscardSame(&state, &stateOriginal, state.whoseTurn + 1) != 1){
+    #####:   97:		validationCheck = 0;
+    #####:   98:		failure++;
+        -:   99:	}
+        1:  100:	printTestResult(validationCheck, 1, 1);
+        -:  101:
+        1:  102:	printf("\n----Test #4: Game state supply count is not modified----\n");
+        1:  103:	validationCheck = 1;
+       29:  104:	for (i = 0; i < 28; i++) {
+       28:  105:		if (state.supplyCount[i] != stateOriginal.supplyCount[i])
+    #####:  106:		validationCheck = 0;
+        -:  107:		//failure++;
+        -:  108:	}
+        1:  109:	if(validationCheck == 0){
+    #####:  110:		failure++;
+        -:  111:	}
+        1:  112:	printTestResult(validationCheck, 1, 1);
+        -:  113:	
+        1:  114:	if(failure == 0){
+    #####:  115:		printf("\n\n\n >>>>>>ALL TESTS PASSED: adventurerCall() \n\n\n");
+        -:  116:	}
+        -:  117:	else{
+        1:  118:		printf("\n\n\n >>>>>>FAILURES IN ADVENTURER: %d \n\n\n", failure);
+        -:  119:	}
+        -:  120:	
+        1:  121:	return 0;
+        -:  122:}

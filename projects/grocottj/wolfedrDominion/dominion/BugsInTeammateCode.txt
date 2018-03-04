@@ -1,0 +1,54 @@
+BugsInTeammateCode:
+
+cardtest1.c: My card test for the smithy card found a bug that produced two failures. 
+The first failure was testing that 3 valid cards are added to the current players hand. 
+The second failure was that the current playres hand count changed by 2
+(3 draws - 1 discard =2 cards). After looking at drew's refactored code for
+the smithy card i found the bug was that it draws 4 cards instead of 3 cards.
+This makes sense for the tests that failed in my card test for smithy.  
+The code with the bug in it is below: 
+/********************************************************
+ Drew Wolfe Dominion.c lines 788 through 792
+//BUG: Should only draw 3 cards  
+    for (i = 0; i < 4; i++) 
+    {
+      drawCard(currentPlayer, state);
+    }
+*********************************************************/
+
+cardtest2.c: Bug found in adventurer that produced 1 failure in my test
+case. This bug was found to be the drawnTreasure increment in Drew's code.
+He introduced a bug that incremented the drawnTreasure by 4 instead of the
+correct incrememnt of 1. The code with the bug is below: 
+/********************************************************
+ Drew Wolfe Dominion.c lines 762 through 765
+if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
+        //drawntreasure++;
+        //BUG: increments by 4. Should increment by 1
+        drawntreasure += 4;
+*********************************************************/
+
+cardtest3.c: A bug was found in villager that produced 1 failure in my 
+test case that failed when two actions were added to the game state. After
+looking at Drew's refactored code in dominion.c the bug was descovered as
+adding 4 actions instead of the correct functionality of adding 2 actions.
+The code with the bug is below: 
+/********************************************************
+ Drew Wolfe Dominion.c lines 709 through 710
+    //BUG: Should only provide 2 action turns
+      state -> numActions = state -> numActions + 4;
+*********************************************************/
+
+cardtest4.c: A bug was also found in the mine card code that produced 4 
+failures in my test case. The first test that fialed was testing that the
+gamestate changed when choice 1 wasnt treasure. The second and third tests that failed 
+was that the gamestate changed when the first choice was copper and the second
+choice was gold. The state should not change when the second choice is too
+costly. The fourth failure was when choice was was copper and two
+was silver. The code trashed the choice 1 card, which is not correct. After 
+looking into drew's code i discovered that he had not refactored the mine card. 
+I spent many hours trying to uncover the bug only to come to the conclusion that
+there was an error in my card test for the mine card. The error was found in my test
+case where i was not assigning the call to card effect to the result variable. After 
+making these changes all tests passed, which was to be expected. 
+		
